@@ -1,0 +1,1 @@
+# Allows importing `app.main:app` in uvicorn

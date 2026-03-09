@@ -1,0 +1,114 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pgvector(map: "vector")]
+}
+
+///////////////////////////////////////////////////////
+// ENUMS
+///////////////////////////////////////////////////////
+
+enum UserRole {
+  organizer
+  attendee
+}
+
+enum PhotoProcessingStatus {
+  pending
+  processed
+  failed
+}
+
+///////////////////////////////////////////////////////
+// MODELS
+///////////////////////////////////////////////////////
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  role          UserRole
+  created_at    DateTime @default(now())
+
+  events        Event[]  @relation("OrganizerEvents")
+  memberships   EventMember[]
+  search_logs   SearchLog[]
+
+  @@map("users")
+}
+
+model Event {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  organizer_id String
+  join_code    String   @unique
+  created_at   DateTime @default(now())
+
+  organizer    User     @relation("OrganizerEvents", fields: [organizer_id], references: [id], onDelete: Cascade)
+  members      EventMember[]
+  photos       Photo[]
+  faces        Face[]
+  search_logs  SearchLog[]
+
+  @@index([organizer_id])
+  @@map("events")
+}
+
+model EventMember {
+  id         String   @id @default(uuid())
+  event_id   String
+  user_id    String
+  joined_at  DateTime @default(now())
+
+  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([event_id, user_id])
+  @@index([event_id])
+  @@map("event_members")
+}
+
+model Photo {
+  id                String                 @id @default(uuid())
+  event_id          String
+  storage_key       String
+  processing_status PhotoProcessingStatus  @default(pending)
+  uploaded_at       DateTime               @default(now())
+
+  event             Event                  @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  faces             Face[]
+
+  @@index([event_id])
+  @@map("photos")
+}
+
+model Face {
+  id         String   @id @default(uuid())
+  photo_id   String
+  event_id   String
+  embedding  Unsupported("vector(512)")
+  created_at DateTime @default(now())
+
+  photo      Photo    @relation(fields: [photo_id], references: [id], onDelete: Cascade)
+  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id])
+  @@map("faces")
+}
+
+model SearchLog {
+  id         String   @id @default(uuid())
+  user_id    String
+  event_id   String
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id])
+
+  @@map("search_logs")
+}
