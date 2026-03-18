@@ -41,17 +41,17 @@ import { prisma } from '../src/infrastructure/prisma.client';
 import jwt from 'jsonwebtoken';
 
 // ─── Mock Helpers ─────────────────────────────────────────────────────────────
-const mockEvent     = prisma.event     as jest.Mocked<typeof prisma.event>;
-const mockPhoto     = prisma.photo     as jest.Mocked<typeof prisma.photo>;
-const mockFace      = prisma.face      as jest.Mocked<typeof prisma.face>;
+const mockEvent = prisma.event as jest.Mocked<typeof prisma.event>;
+const mockPhoto = prisma.photo as jest.Mocked<typeof prisma.photo>;
+const mockFace = prisma.face as jest.Mocked<typeof prisma.face>;
 const mockSearchLog = prisma.searchLog as jest.Mocked<typeof prisma.searchLog>;
 
 // ─── Shared Fixtures ──────────────────────────────────────────────────────────
 const organizerPayload = { userId: 'organizer-uuid-001', role: 'organizer' };
-const attendeePayload  = { userId: 'attendee-uuid-002',  role: 'attendee'  };
+const attendeePayload = { userId: 'attendee-uuid-002', role: 'attendee' };
 
 const ORGANIZER_TOKEN = 'Bearer mocked_organizer_token';
-const ATTENDEE_TOKEN  = 'Bearer mocked_attendee_token';
+const ATTENDEE_TOKEN = 'Bearer mocked_attendee_token';
 
 const EVENT_ID = 'event-uuid-001';
 
@@ -69,7 +69,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   (jwt.verify as jest.Mock).mockImplementation((token, _secret, cb) => {
-    const payload = token === 'mocked_attendee_token' ? attendeePayload : organizerPayload;
+    const payload =
+      token === 'mocked_attendee_token' ? attendeePayload : organizerPayload;
     if (cb) return cb(null, payload);
     return payload;
   });
@@ -79,7 +80,6 @@ beforeEach(() => {
 // SUITE 8 — ANALYTICS: GET EVENT STATS
 // ─────────────────────────────────────────────────────────────────────────────
 describe('Analytics — Get Event Stats  GET /api/v1/events/:eventId/stats', () => {
-
   // ✅ Should return totalPhotos
   it('✅ returns totalPhotos count for the event', async () => {
     mockEvent.findUnique.mockResolvedValue(mockEventRecord);
@@ -139,9 +139,9 @@ describe('Analytics — Get Event Stats  GET /api/v1/events/:eventId/stats', () 
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
-      totalPhotos:        expect.any(Number),
+      totalPhotos: expect.any(Number),
       totalFacesDetected: expect.any(Number),
-      searchCount:        expect.any(Number),
+      searchCount: expect.any(Number),
     });
   });
 
@@ -158,13 +158,13 @@ describe('Analytics — Get Event Stats  GET /api/v1/events/:eventId/stats', () 
 
     // Each count call must filter by event_id
     expect(mockPhoto.count).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { event_id: EVENT_ID } }),
+      expect.objectContaining({ where: { event_id: EVENT_ID } })
     );
     expect(mockFace.count).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { event_id: EVENT_ID } }),
+      expect.objectContaining({ where: { event_id: EVENT_ID } })
     );
     expect(mockSearchLog.count).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { event_id: EVENT_ID } }),
+      expect.objectContaining({ where: { event_id: EVENT_ID } })
     );
   });
 
@@ -190,7 +190,10 @@ describe('Analytics — Get Event Stats  GET /api/v1/events/:eventId/stats', () 
 
   // ❌ Organizer cannot access another organizer's event stats (403)
   it("❌ returns 403 when organizer tries to access another organizer's event stats", async () => {
-    const otherOrganizerEvent = { ...mockEventRecord, organizer_id: 'other-organizer-uuid' };
+    const otherOrganizerEvent = {
+      ...mockEventRecord,
+      organizer_id: 'other-organizer-uuid',
+    };
     mockEvent.findUnique.mockResolvedValue(otherOrganizerEvent);
 
     const res = await request(app)
@@ -202,8 +205,7 @@ describe('Analytics — Get Event Stats  GET /api/v1/events/:eventId/stats', () 
 
   // ❌ No auth token → 401
   it('❌ returns 401 when no auth token is provided', async () => {
-    const res = await request(app)
-      .get(`/api/v1/events/${EVENT_ID}/stats`);
+    const res = await request(app).get(`/api/v1/events/${EVENT_ID}/stats`);
 
     expect(res.status).toBe(401);
   });
