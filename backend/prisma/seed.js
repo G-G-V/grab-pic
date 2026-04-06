@@ -1,4 +1,5 @@
-const { prisma } = require('../src/modules/infrastructure/prisma.client');
+// const { prisma } = require('../src/modules/infrastructure/prisma.client');
+import { prisma } from '../src/modules/infrastructure/prisma.client.js';
 
 async function main() {
   console.log('--- Starting Seeding ---');
