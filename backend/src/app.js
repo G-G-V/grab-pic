@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 
+import { errorHandler } from './modules/middleware/errorHandler.js';
+import { notFoundHandler } from './modules/middleware/notFoundHandler.js';
+
 // Routes (will be created module by module)
 import authRoutes from './modules/auth/auth.routes.js';
 import eventRoutes from './modules/events/events.routes.js';
@@ -14,16 +17,21 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // 10mb for base64 image uploads in search
 
-// Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/events', eventRoutes);
-app.use('/api/v1/events', photoRoutes);
-app.use('/api/v1/events', searchRoutes);
-app.use('/api/v1/events', analyticsRoutes);
+app.use(express.urlencoded({ extended: true }));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// // Routes - Routes will be mounted here as modules are built
+// app.use('/api/v1/auth', authRoutes);
+// app.use('/api/v1/events', eventRoutes);
+// app.use('/api/v1/events', photoRoutes);
+// app.use('/api/v1/events', searchRoutes);
+// app.use('/api/v1/events', analyticsRoutes);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;
