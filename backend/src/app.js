@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 import { errorHandler } from './modules/middleware/errorHandler.js';
 import { notFoundHandler } from './modules/middleware/notFoundHandler.js';
@@ -18,6 +20,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' })); // 10mb for base64 image uploads in search
 
 app.use(express.urlencoded({ extended: true }));
+
+app.use(helmet());
+app.use(morgan('dev'));
 
 // Health check
 app.get('/health', (req, res) => {
