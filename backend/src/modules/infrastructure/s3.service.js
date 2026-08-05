@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 // import { env } from '../config/env.js';
@@ -59,3 +60,25 @@ export const buildStorageKey = (eventId, photoId, filename) => {
 
 //buildStorageKey — this is a utility that lives here because it's S3-specific. Your photos service calls this to build the storage_key before creating the photo record in DB and generating the presigned PUT URL. The key pattern events/{eventId}/{photoId}.{ext} keeps S3 organized and makes the photo retrievable by just knowing its DB record.
 //Expiry times — PUT URL is 5 minutes (organizer has limited time to upload after getting the URL), GET URL is 1 hour (enough time for attendee to view/download search results). Both are configurable per call.
+
+////
+/**
+ * Deletes multiple objects from S3 by their storage keys.
+ * Called before event deletion to avoid orphaned files in the bucket.
+ * @param {string[]} storageKeys - array of S3 object keys to delete
+ */
+export const deleteS3Objects = async (storageKeys) => {
+  if (!storageKeys || storageKeys.length === 0) return;
+
+  const command = new DeleteObjectsCommand({
+    Bucket: env.S3_BUCKET_NAME,
+    Delete: {
+      Objects: storageKeys.map((key) => ({ Key: key })),
+      Quiet: true, // only report errors, not successes
+    },
+  });
+
+  await s3Client.send(command);
+};
+
+////
