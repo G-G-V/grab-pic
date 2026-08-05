@@ -1,5 +1,6 @@
 import { prisma } from '../infrastructure/prisma.client.js';
 import { generateJoinCode } from '../utils/generateJoinCode.js';
+import { deleteS3Objects } from '../infrastructure/s3.service.js';
 
 /**
  * Creates a new event for the organizer.
@@ -59,6 +60,11 @@ export const getMyEventsService = async ({ organizerId }) => {
  * Deletes an event.
  * Verifies ownership — organizer can only delete their own events.
  * Prisma cascade handles photos + faces + event_members deletion.
+ * Deletes S3 objects for all photos in the event before DB deletion.
+ * Duplicate join → Prisma P2002 → errorHandler returns 409.
+ * Invalid joinCode → manual 404.
+ * Invalid eventId → Prisma P2025 → errorHandler returns 404.
+ * Invalid ownership → manual 403.
  * P2025 (not found) is caught by errorHandler → 404.
  */
 export const deleteEventService = async ({ eventId, organizerId }) => {
@@ -79,6 +85,17 @@ export const deleteEventService = async ({ eventId, organizerId }) => {
     err.statusCode = 403;
     throw err;
   }
+
+  // Fetch all storage keys for this event's photos before DB cascade wipes the records
+  const photos = await prisma.photo.findMany({
+    where: { event_id: eventId },
+    select: { storage_key: true },
+  });
+
+  const storageKeys = photos.map((p) => p.storage_key);
+
+  // Delete from S3 first, then let Prisma cascade handle DB cleanup
+  await deleteS3Objects(storageKeys);
 
   await prisma.event.delete({
     where: { id: eventId },
