@@ -30,7 +30,7 @@ app.get('/health', (req, res) => {
 });
 
 // // Routes - Routes will be mounted here as modules are built
-// app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 // app.use('/api/v1/events', eventRoutes);
 // app.use('/api/v1/events', photoRoutes);
 // app.use('/api/v1/events', searchRoutes);
