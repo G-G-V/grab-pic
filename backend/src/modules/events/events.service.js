@@ -94,6 +94,9 @@ export const deleteEventService = async ({ eventId, organizerId }) => {
 
   const storageKeys = photos.map((p) => p.storage_key);
 
+  // Delete search logs first — no cascade defined on this relation
+  await prisma.searchLog.deleteMany({ where: { event_id: eventId } });
+
   // Delete from S3 first, then let Prisma cascade handle DB cleanup
   await deleteS3Objects(storageKeys);
 
