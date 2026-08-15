@@ -74,8 +74,23 @@ export const searchPhotosService = async ({ eventId, userId, imageBase64 }) => {
     return { matches: [] };
   }
 
+  //
+  const deduplicated = Object.values(
+    matches.reduce((acc, match) => {
+      if (
+        !acc[match.photo_id] ||
+        match.similarity > acc[match.photo_id].similarity
+      ) {
+        acc[match.photo_id] = match;
+      }
+      return acc;
+    }, {})
+  );
+  //
+
   // 5. Fetch storage_key for each matched photo_id, generate presigned GET URLs
-  const photoIds = matches.map((m) => m.photo_id);
+  // const photoIds = matches.map((m) => m.photo_id);
+  const photoIds = deduplicated.map((m) => m.photo_id);
 
   const photos = await prisma.photo.findMany({
     where: { id: { in: photoIds } },
