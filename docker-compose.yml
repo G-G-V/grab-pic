@@ -21,5 +21,44 @@ services:
     ports:
       - "6379:6379"
 
+  ml-service:
+    build: ./ml-service
+    container_name: grabpic_ml
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  backend:
+    build: ./backend
+    container_name: grabpic_backend
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://grabpic_user:grabpic_pass@postgres:5432/grabpic_db
+      - REDIS_URL=redis://redis:6379
+      - ML_SERVICE_URL=http://ml-service:8000
+
+  worker:
+    build: ./backend
+    container_name: grabpic_worker
+    command: node src/modules/infrastructure/worker.js
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+      - ml-service
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://grabpic_user:grabpic_pass@postgres:5432/grabpic_db
+      - REDIS_URL=redis://redis:6379
+      - ML_SERVICE_URL=http://ml-service:8000
+
 volumes:
   postgres_data:
