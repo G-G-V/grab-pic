@@ -39,6 +39,10 @@ const worker = new Worker(
     // 2. Generate presigned GET URL so ML can download the image from S3
     const imageUrl = await generatePresignedGetUrl(photo.storage_key);
 
+    //
+    // console.log('[worker] imageUrl:', imageUrl); //
+    //
+
     // 3. Call ML service — returns array of { embedding, bbox }
     const faces = await processImage({ imageUrl });
 
