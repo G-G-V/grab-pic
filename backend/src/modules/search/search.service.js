@@ -64,7 +64,7 @@ export const searchPhotosService = async ({ eventId, userId, imageBase64 }) => {
       photo_id::text,
       1 - (embedding <=> ${embeddingStr}::vector(512)) AS similarity
     FROM faces
-    WHERE event_id = ${eventId}::uuid
+    WHERE event_id = ${eventId}
       AND 1 - (embedding <=> ${embeddingStr}::vector(512)) >= ${SIMILARITY_THRESHOLD}
     ORDER BY embedding <=> ${embeddingStr}::vector(512)
     LIMIT ${MATCH_LIMIT}
