@@ -132,3 +132,24 @@ export const joinEventService = async ({ joinCode, userId }) => {
 
   return { eventId: event.id, name: event.name };
 };
+
+export const getJoinedEventsService = async ({ userId }) => {
+  const memberships = await prisma.eventMember.findMany({
+    where: { user_id: userId },
+    include: {
+      event: {
+        select: { id: true, name: true, created_at: true },
+      },
+    },
+    orderBy: { joined_at: 'desc' },
+  });
+
+  return {
+    events: memberships.map((m) => ({
+      id: m.event.id,
+      name: m.event.name,
+      joinedAt: m.joined_at,
+      createdAt: m.event.created_at,
+    })),
+  };
+};
