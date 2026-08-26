@@ -1,84 +1,120 @@
+import { useEffect, useState } from "react";
 import { StatsCard } from "@/components/StatsCard";
-import { mockEventStats } from "@/data/mock";
+import { getEvents } from "@/api/events";
+import { getEventStats, type EventStats } from "@/api/stats";
 import { Images, Users, Search, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
-
-function BarChart({ data, color, labels }: { data: number[]; color: string; labels: string[] }) {
-  const max = Math.max(...data);
-  return (
-    <div>
-      <div className="flex items-end gap-2 h-40">
-        {data.map((v, i) => (
-          <motion.div
-            key={i}
-            initial={{ height: 0 }}
-            animate={{ height: `${(v / max) * 100}%` }}
-            transition={{ delay: i * 0.05, duration: 0.5, ease: "easeOut" }}
-            className="flex-1 rounded-t-lg transition-all hover:opacity-80 cursor-pointer relative group"
-            style={{ background: color }}
-          >
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 hidden group-hover:block text-xs font-medium bg-card border border-border/40 rounded-md px-2 py-1 whitespace-nowrap">
-              {v}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="flex justify-between mt-3 text-xs text-muted-foreground">
-        {labels.map((d) => (
-          <span key={d}>{d}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import { toast } from "@/hooks/use-toast";
 
 export default function Analytics() {
+  const [stats, setStats] = useState<EventStats>({
+    totalPhotos: 0,
+    totalFacesDetected: 0,
+    uniqueFaces: 0,
+    searchCount: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, []);
+
+  const loadAnalytics = async () => {
+    try {
+      setLoading(true);
+
+      const events = await getEvents();
+
+      const eventStats = await Promise.all(
+        events.map((event) => getEventStats(event.id)),
+      );
+
+      setStats(
+        eventStats.reduce(
+          (total, current) => ({
+            totalPhotos: total.totalPhotos + current.totalPhotos,
+            totalFacesDetected:
+              total.totalFacesDetected + current.totalFacesDetected,
+            uniqueFaces: total.uniqueFaces + current.uniqueFaces,
+            searchCount: total.searchCount + current.searchCount,
+          }),
+          {
+            totalPhotos: 0,
+            totalFacesDetected: 0,
+            uniqueFaces: 0,
+            searchCount: 0,
+          },
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+
+      toast({
+        title: "Failed to load analytics",
+        description:
+          error instanceof Error ? error.message : "Unable to load analytics.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-muted-foreground">Loading analytics...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold font-display">Analytics</h1>
-        <p className="text-muted-foreground mt-1">Insights across all your events</p>
+        <p className="text-muted-foreground mt-1">
+          Insights across all your events
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard title="Total Photos" value={mockEventStats.totalPhotos} icon={Images} trend="+12%" />
-        <StatsCard title="Faces Detected" value={mockEventStats.totalFacesDetected} icon={Users} trend="+8%" />
-        <StatsCard title="Unique Faces" value={mockEventStats.uniqueFaces} icon={TrendingUp} trend="+5%" />
-        <StatsCard title="Searches" value={mockEventStats.searchCount} icon={Search} trend="+24%" />
+        <StatsCard
+          title="Total Photos"
+          value={stats.totalPhotos}
+          icon={Images}
+        />
+
+        <StatsCard
+          title="Faces Detected"
+          value={stats.totalFacesDetected}
+          icon={Users}
+        />
+
+        <StatsCard
+          title="Unique Faces"
+          value={stats.uniqueFaces}
+          icon={TrendingUp}
+        />
+
+        <StatsCard title="Searches" value={stats.searchCount} icon={Search} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="glass border-border/40">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display text-base">Photos Uploaded</CardTitle>
-            <p className="text-xs text-muted-foreground">Last 7 days</p>
-          </CardHeader>
-          <CardContent>
-            <BarChart
-              data={[120, 340, 280, 520, 410, 680, 590]}
-              color="hsl(239 84% 67%)"
-              labels={days}
-            />
-          </CardContent>
-        </Card>
+      <Card className="glass border-border/40">
+        <CardHeader>
+          <CardTitle className="font-display text-base">
+            Analytics Overview
+          </CardTitle>
+        </CardHeader>
 
-        <Card className="glass border-border/40">
-          <CardHeader className="pb-2">
-            <CardTitle className="font-display text-base">Search Queries</CardTitle>
-            <p className="text-xs text-muted-foreground">Last 7 days</p>
-          </CardHeader>
-          <CardContent>
-            <BarChart
-              data={[80, 200, 150, 380, 290, 450, 520]}
-              color="hsl(188 94% 53%)"
-              labels={days}
-            />
-          </CardContent>
-        </Card>
-      </div>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            These metrics represent the current aggregate statistics across all
+            your events. Historical daily analytics are not currently available
+            from the backend.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

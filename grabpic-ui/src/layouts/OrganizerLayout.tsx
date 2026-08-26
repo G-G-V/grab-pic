@@ -13,7 +13,11 @@ export default function OrganizerLayout() {
           <header className="h-14 flex items-center border-b border-border/30 px-4 bg-background/60 backdrop-blur-xl sticky top-0 z-30">
             <SidebarTrigger className="mr-4" />
             <div className="ml-auto flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground relative"
+              >
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-secondary" />
               </Button>

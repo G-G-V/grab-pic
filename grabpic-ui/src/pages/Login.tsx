@@ -15,7 +15,8 @@ import { motion } from "framer-motion";
 
 import { login } from "@/api/auth";
 
-import { toast } from "@/components/ui/use-toast";
+// import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export default function Login() {
   const [email, setEmail] = useState("");

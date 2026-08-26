@@ -25,12 +25,12 @@ interface JoinEventResponse {
   eventName: string;
 }
 
-export interface EventStats {
-  totalPhotos: number;
-  totalFacesDetected: number;
-  uniqueFaces: number;
-  searchCount: number;
-}
+// export interface EventStats {
+//   totalPhotos: number;
+//   totalFacesDetected: number;
+//   uniqueFaces: number;
+//   searchCount: number;
+// }
 
 export interface JoinedEvent {
   id: string;
@@ -38,15 +38,6 @@ export interface JoinedEvent {
   joinedAt: string;
   createdAt: string;
 }
-
-// export async function getEvents(): Promise<Event[]> {
-//   const data = await apiRequest<{
-//     success: true;
-//     events: Event[];
-//   }>("/events");
-
-//   return data.events;
-// }
 
 export async function getEvents(): Promise<Event[]> {
   const response = await apiRequest<EventsResponse>("/events", {
@@ -84,24 +75,6 @@ export async function deleteEvent(eventId: string): Promise<void> {
   });
 }
 
-// export async function joinEvent(joinCode: string): Promise<JoinEventResponse> {
-//   const data = await apiRequest<{
-//     success: true;
-//     eventId: string;
-//     name: string;
-//   }>("/events/join", {
-//     method: "POST",
-//     body: JSON.stringify({
-//       joinCode,
-//     }),
-//   });
-
-//   return {
-//     eventId: data.eventId,
-//     name: data.name,
-//   };
-// }
-
 export async function joinEvent(joinCode: string): Promise<JoinEventResponse> {
   return apiRequest<JoinEventResponse>("/events/join", {
     method: "POST",
@@ -109,15 +82,6 @@ export async function joinEvent(joinCode: string): Promise<JoinEventResponse> {
       joinCode,
     }),
   });
-}
-
-export async function getEventStats(eventId: string): Promise<EventStats> {
-  const data = await apiRequest<{
-    success: true;
-    stats: EventStats;
-  }>(`/events/${eventId}/stats`);
-
-  return data.stats;
 }
 
 export async function getJoinedEvents(): Promise<JoinedEvent[]> {
