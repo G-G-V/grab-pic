@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { presignPhotos, confirmUpload } from './photos.controller.js';
+import {
+  presignPhotos,
+  confirmUpload,
+  downloadEventPhotos,
+} from './photos.controller.js';
 import { validate } from '../middleware/validate.js';
 import {
   presignSchema,
@@ -28,5 +32,8 @@ router.post(
   validate(confirmUploadSchema),
   asyncHandler(confirmUpload)
 );
+
+// GET /api/v1/events/:eventId/photos/download — attendee
+router.get('/download', authenticate, asyncHandler(downloadEventPhotos));
 
 export default router;
