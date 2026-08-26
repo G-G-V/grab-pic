@@ -100,7 +100,8 @@ export const searchPhotosService = async ({ eventId, userId, imageBase64 }) => {
   const photoMap = Object.fromEntries(photos.map((p) => [p.id, p.storage_key]));
 
   const results = await Promise.all(
-    matches.map(async (match) => {
+    // matches.map(async (match) => {
+    deduplicated.map(async (match) => {
       const storageKey = photoMap[match.photo_id];
       const url = await generatePresignedGetUrl(storageKey);
       return {

@@ -4,6 +4,7 @@ import {
   getMyEvents,
   deleteEvent,
   joinEvent,
+  getJoinedEvents,
 } from './events.controller.js';
 import { validate } from '../middleware/validate.js';
 import {
@@ -32,6 +33,9 @@ router.get(
   requireRole('organizer'),
   asyncHandler(getMyEvents)
 );
+
+// GET /api/v1/events/joined — attendee's joined events
+router.get('/joined', authenticate, asyncHandler(getJoinedEvents));
 
 // DELETE /api/v1/events/:eventId — organizer only
 router.delete(

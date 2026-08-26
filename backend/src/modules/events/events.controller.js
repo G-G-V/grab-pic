@@ -3,6 +3,7 @@ import {
   getMyEventsService,
   deleteEventService,
   joinEventService,
+  getJoinedEventsService,
 } from './events.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 
@@ -54,5 +55,11 @@ export const joinEvent = async (req, res) => {
 
   const result = await joinEventService({ joinCode, userId });
 
+  return sendSuccess(res, result, 200);
+};
+
+export const getJoinedEvents = async (req, res) => {
+  const { userId } = req.user;
+  const result = await getJoinedEventsService({ userId });
   return sendSuccess(res, result, 200);
 };
