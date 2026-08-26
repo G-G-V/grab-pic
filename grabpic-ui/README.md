@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+# GrabPic Frontend
 
-## Project info
+React + TypeScript frontend for GrabPic, an AI-powered event photo discovery platform.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Tech Stack
 
-## How can I edit this code?
+- React
+- TypeScript
+- Vite
+- React Router
+- TanStack Query
+- Tailwind CSS
+- shadcn/ui
+- Framer Motion
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+### Organizer
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Create and manage events
+- Generate event join codes
+- Upload event photos directly to S3 using presigned URLs
+- Monitor photo processing
+- View event statistics
+- Delete events
 
-Changes made via Lovable will be committed automatically to this repo.
+### Attendee
 
-**Use your preferred IDE**
+- Join events using organizer-provided codes
+- Upload or capture a selfie
+- Search event photos using AI face recognition
+- View matched photos
+- Download individual photos
+- Download multiple matched photos as a ZIP
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Install dependencies:
 
-Follow these steps:
+```bash
+npm run build
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
 ```
 
-**Edit a file directly in GitHub**
+Start the development server:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+npm run dev
 
-**Use GitHub Codespaces**
+Create a production build:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+npm run build
 
-## What technologies are used for this project?
+Preview the production build:
 
-This project is built with:
+npm run preview
+Backend
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The frontend communicates with the GrabPic backend API.
 
-## How can I deploy this project?
+Configure the API base URL using the frontend environment configuration used by src/api/client.ts.
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Architecture
 
-## Can I connect a custom domain to my Lovable project?
+Organizer photo uploads use presigned S3 URLs, allowing image files to be transferred directly between the browser and object storage without routing the image bytes through the Node.js backend.
 
-Yes, you can!
+Attendee photo search sends the selfie to the backend, which coordinates the face-recognition pipeline and returns matched photo metadata and presigned S3 URLs.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Bulk downloads are handled through the backend ZIP-download endpoint.

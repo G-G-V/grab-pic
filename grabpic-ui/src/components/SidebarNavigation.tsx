@@ -1,4 +1,12 @@
-import { LayoutDashboard, Calendar, Upload, BarChart3, Settings, Camera, LogOut } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  // Upload,
+  BarChart3,
+  Settings,
+  Camera,
+  LogOut,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import {
@@ -18,7 +26,7 @@ import { Separator } from "@/components/ui/separator";
 const navItems = [
   { title: "Dashboard", url: "/organizer", icon: LayoutDashboard },
   { title: "My Events", url: "/organizer/events", icon: Calendar },
-  { title: "Upload Photos", url: "/organizer/upload", icon: Upload },
+  // { title: "Upload Photos", url: "/organizer/upload", icon: Upload },
   { title: "Analytics", url: "/organizer/analytics", icon: BarChart3 },
   { title: "Settings", url: "/organizer/settings", icon: Settings },
 ];
@@ -36,7 +44,9 @@ export function SidebarNavigation() {
             <Camera className="h-5 w-5 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-bold font-display gradient-text">GrabPic</span>
+            <span className="text-lg font-bold font-display gradient-text">
+              GrabPic
+            </span>
           )}
         </Link>
       </SidebarHeader>
@@ -48,9 +58,10 @@ export function SidebarNavigation() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
-                const isActive = item.url === "/organizer"
-                  ? location.pathname === "/organizer"
-                  : location.pathname.startsWith(item.url);
+                const isActive =
+                  item.url === "/organizer"
+                    ? location.pathname === "/organizer"
+                    : location.pathname.startsWith(item.url);
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -81,7 +92,7 @@ export function SidebarNavigation() {
                 J
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">john@example.com</p>
+                <p className="text-sm font-medium truncate"></p>
                 <p className="text-xs text-muted-foreground">Organizer</p>
               </div>
             </div>

@@ -11,7 +11,6 @@ import OrganizerLayout from "./layouts/OrganizerLayout";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import MyEvents from "./pages/organizer/MyEvents";
 import EventDetail from "./pages/organizer/EventDetail";
-import UploadPhotos from "./pages/organizer/UploadPhotos";
 import Analytics from "./pages/organizer/Analytics";
 import OrganizerSettings from "./pages/organizer/Settings";
 import NotFound from "./pages/NotFound";
@@ -33,7 +32,6 @@ const App = () => (
             <Route index element={<OrganizerDashboard />} />
             <Route path="events" element={<MyEvents />} />
             <Route path="events/:eventId" element={<EventDetail />} />
-            <Route path="upload" element={<UploadPhotos />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="settings" element={<OrganizerSettings />} />
           </Route>
