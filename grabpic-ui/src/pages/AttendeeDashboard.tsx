@@ -26,6 +26,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { CameraCapture } from "@/components/CameraCapture";
 
+// import { apiRequest } from "@/api/client";
+
 export default function AttendeeDashboard() {
   const [events, setEvents] = useState<JoinedEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<JoinedEvent | null>(null);
@@ -131,6 +133,84 @@ export default function AttendeeDashboard() {
     }
   };
 
+  // // const handleDownloadAll = async () => {
+  // //   if (!results || results.length === 0) return;
+
+  // //   for (const match of results) {
+  // //     try {
+  // //       const response = await fetch(match.url);
+
+  // //       if (!response.ok) {
+  // //         console.error(`Failed to download ${match.photoId}`);
+  // //         continue;
+  // //       }
+
+  // //       const blob = await response.blob();
+  // //       const blobUrl = URL.createObjectURL(blob);
+
+  // //       const anchor = document.createElement("a");
+  // //       anchor.href = blobUrl;
+  // //       anchor.download = `photo-${match.photoId}.jpg`;
+
+  // //       document.body.appendChild(anchor);
+  // //       anchor.click();
+  // //       document.body.removeChild(anchor);
+
+  // //       URL.revokeObjectURL(blobUrl);
+
+  // //       // Give the browser a little time between downloads.
+  // //       await new Promise((resolve) => setTimeout(resolve, 500));
+  // //     } catch (error) {
+  // //       console.error(`Download failed for ${match.photoId}:`, error);
+  // //     }
+  // //   }
+  // // };
+
+  // // const handleDownloadAll = async () => {
+  // //   if (!results || results.length === 0) return;
+
+  // //   for (const match of results) {
+  // //     const a = document.createElement("a");
+  // //     a.href = match.url;
+  // //     a.download = `photo-${match.photoId}.jpg`;
+
+  // //     document.body.appendChild(a);
+  // //     a.click();
+  // //     a.remove();
+
+  // //     await new Promise((resolve) => setTimeout(resolve, 500));
+  // //   }
+  // // };
+
+  // const handleDownload = async () => {
+  //   try {
+  //     const response = await fetch(match.url);
+
+  //     console.log("DOWNLOAD STATUS:", response.status);
+  //     console.log("CONTENT TYPE:", response.headers.get("content-type"));
+  //     console.log("CONTENT LENGTH:", response.headers.get("content-length"));
+
+  //     const blob = await response.blob();
+
+  //     console.log("BLOB TYPE:", blob.type);
+  //     console.log("BLOB SIZE:", blob.size);
+
+  //     const blobUrl = URL.createObjectURL(blob);
+
+  //     const a = document.createElement("a");
+  //     a.href = blobUrl;
+  //     a.download = `${match.photoId}.jpg`;
+
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     document.body.removeChild(a);
+
+  //     URL.revokeObjectURL(blobUrl);
+  //   } catch (error) {
+  //     console.error("Download failed:", error);
+  //   }
+  // };
+
   // const handleDownloadAll = async () => {
   //   if (!results || results.length === 0) return;
 
@@ -139,11 +219,17 @@ export default function AttendeeDashboard() {
   //       const response = await fetch(match.url);
 
   //       if (!response.ok) {
-  //         console.error(`Failed to download ${match.photoId}`);
-  //         continue;
+  //         throw new Error(`Failed to download ${match.photoId}`);
   //       }
 
   //       const blob = await response.blob();
+
+  //       console.log("DOWNLOAD STATUS:", response.status);
+  //       console.log("CONTENT TYPE:", response.headers.get("content-type"));
+  //       console.log("CONTENT LENGTH:", response.headers.get("content-length"));
+  //       console.log("BLOB TYPE:", blob.type);
+  //       console.log("BLOB SIZE:", blob.size);
+
   //       const blobUrl = URL.createObjectURL(blob);
 
   //       const anchor = document.createElement("a");
@@ -156,7 +242,6 @@ export default function AttendeeDashboard() {
 
   //       URL.revokeObjectURL(blobUrl);
 
-  //       // Give the browser a little time between downloads.
   //       await new Promise((resolve) => setTimeout(resolve, 500));
   //     } catch (error) {
   //       console.error(`Download failed for ${match.photoId}:`, error);
@@ -164,88 +249,60 @@ export default function AttendeeDashboard() {
   //   }
   // };
 
-  // const handleDownloadAll = async () => {
-  //   if (!results || results.length === 0) return;
+  ////
+  const handleDownload = async (photoIds: string[]) => {
+    if (!selectedEvent || photoIds.length === 0) return;
 
-  //   for (const match of results) {
-  //     const a = document.createElement("a");
-  //     a.href = match.url;
-  //     a.download = `photo-${match.photoId}.jpg`;
-
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     a.remove();
-
-  //     await new Promise((resolve) => setTimeout(resolve, 500));
-  //   }
-  // };
-
-  const handleDownload = async () => {
     try {
-      const response = await fetch(match.url);
+      const token = localStorage.getItem("grabpic_token");
 
-      console.log("DOWNLOAD STATUS:", response.status);
-      console.log("CONTENT TYPE:", response.headers.get("content-type"));
-      console.log("CONTENT LENGTH:", response.headers.get("content-length"));
+      const query = encodeURIComponent(photoIds.join(","));
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/events/${selectedEvent.id}/photos/download?photoIds=${query}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
+        throw new Error(
+          data?.error ||
+            data?.message ||
+            `Download failed with status ${response.status}`,
+        );
+      }
 
       const blob = await response.blob();
 
-      console.log("BLOB TYPE:", blob.type);
-      console.log("BLOB SIZE:", blob.size);
-
       const blobUrl = URL.createObjectURL(blob);
 
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = `${match.photoId}.jpg`;
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.download = "photos.zip";
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
 
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Download failed:", error);
+
+      toast({
+        title: "Download failed",
+        description:
+          error instanceof Error ? error.message : "Unable to download photos.",
+        variant: "destructive",
+      });
     }
   };
-
-  const handleDownloadAll = async () => {
-    if (!results || results.length === 0) return;
-
-    for (const match of results) {
-      try {
-        const response = await fetch(match.url);
-
-        if (!response.ok) {
-          throw new Error(`Failed to download ${match.photoId}`);
-        }
-
-        const blob = await response.blob();
-
-        console.log("DOWNLOAD STATUS:", response.status);
-        console.log("CONTENT TYPE:", response.headers.get("content-type"));
-        console.log("CONTENT LENGTH:", response.headers.get("content-length"));
-        console.log("BLOB TYPE:", blob.type);
-        console.log("BLOB SIZE:", blob.size);
-
-        const blobUrl = URL.createObjectURL(blob);
-
-        const anchor = document.createElement("a");
-        anchor.href = blobUrl;
-        anchor.download = `photo-${match.photoId}.jpg`;
-
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-
-        URL.revokeObjectURL(blobUrl);
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error(`Download failed for ${match.photoId}:`, error);
-      }
-    }
-  };
+  ////
 
   if (loadingEvents) {
     return (
@@ -428,7 +485,14 @@ export default function AttendeeDashboard() {
               </h2>
 
               {results.length > 0 && (
-                <Button variant="outline" size="sm" onClick={handleDownloadAll}>
+                // <Button variant="outline" size="sm" onClick={handleDownloadAll}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    handleDownload(results.map((match: any) => match.photoId))
+                  }
+                >
                   <Download className="mr-1.5 h-4 w-4" />
                   Download All
                 </Button>
@@ -437,8 +501,15 @@ export default function AttendeeDashboard() {
 
             {results.length > 0 ? (
               <div className="masonry-grid">
-                {results.map((match: any) => (
+                {/* {results.map((match: any) => (
                   <SearchResultCard key={match.photoId} match={match} />
+                ))} */}
+                {results.map((match: any) => (
+                  <SearchResultCard
+                    key={match.photoId}
+                    match={match}
+                    onDownload={() => handleDownload([match.photoId])}
+                  />
                 ))}
               </div>
             ) : (

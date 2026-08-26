@@ -1,10 +1,15 @@
 import { prisma } from '../infrastructure/prisma.client.js';
 import {
   generatePresignedPutUrl,
+  generatePresignedGetUrl,
   buildStorageKey,
 } from '../infrastructure/s3.service.js';
 import { photoQueue } from '../infrastructure/queue.js';
 import { randomUUID } from 'crypto';
+
+// import archiver from 'archiver';
+import axios from 'axios';
+import { ZipArchive } from 'archiver';
 
 /**
  * Creates photo records in DB (status='pending'),
@@ -107,4 +112,49 @@ export const confirmUploadService = async ({
   await Promise.all(
     photoIds.map((photoId) => photoQueue.add('process-photo', { photoId }))
   );
+};
+
+export const downloadEventPhotosService = async ({
+  eventId,
+  userId,
+  photoIds,
+  res,
+}) => {
+  const membership = await prisma.eventMember.findUnique({
+    where: { event_id_user_id: { event_id: eventId, user_id: userId } },
+    select: { id: true },
+  });
+
+  if (!membership) {
+    const err = new Error('Access denied. You have not joined this event.');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const photos = await prisma.photo.findMany({
+    where: {
+      event_id: eventId,
+      ...(photoIds ? { id: { in: photoIds } } : {}),
+    },
+    select: { id: true, storage_key: true },
+  });
+
+  // console.log('ARCHIVER MODULE:', archiverModule);
+  // console.log('ARCHIVER TYPE:', typeof archiver);
+  const archive = new ZipArchive({
+    zlib: { level: 5 },
+  });
+
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', 'attachment; filename="photos.zip"');
+  archive.pipe(res);
+
+  for (const photo of photos) {
+    const url = await generatePresignedGetUrl(photo.storage_key);
+    const response = await axios.get(url, { responseType: 'stream' });
+    const extension = photo.storage_key.split('.').pop();
+    archive.append(response.data, { name: `${photo.id}.${extension}` });
+  }
+
+  await archive.finalize();
 };

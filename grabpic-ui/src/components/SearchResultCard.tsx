@@ -4,23 +4,123 @@ import { Download, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SearchMatch } from "@/api/search";
 
+// interface SearchResultCardProps {
+//   match: SearchMatch;
+//   className?: string;
+// }
+
 interface SearchResultCardProps {
   match: SearchMatch;
+  onDownload: () => void;
   className?: string;
 }
 
-export function SearchResultCard({ match, className }: SearchResultCardProps) {
+// export function SearchResultCard({ match, className }: SearchResultCardProps) {
+export function SearchResultCard({
+  match,
+  onDownload,
+  className,
+}: SearchResultCardProps) {
   const scorePercent = Math.round(match.similarityScore * 100);
 
+  // // const handleDownload = async () => {
+  // //   try {
+  // //     const response = await fetch(match.url);
+
+  // //     if (!response.ok) {
+  // //       throw new Error("Failed to download image.");
+  // //     }
+
+  // //     const blob = await response.blob();
+  // //     const blobUrl = URL.createObjectURL(blob);
+
+  // //     const anchor = document.createElement("a");
+  // //     anchor.href = blobUrl;
+  // //     anchor.download = `${match.photoId}.jpg`;
+
+  // //     document.body.appendChild(anchor);
+  // //     anchor.click();
+  // //     anchor.remove();
+
+  // //     URL.revokeObjectURL(blobUrl);
+  // //   } catch (error) {
+  // //     console.error("Download failed:", error);
+  // //   }
+  // // };
+
+  // // const handleDownload = () => {
+  // //   const link = document.createElement("a");
+  // //   link.href = match.url;
+  // //   link.download = `${match.photoId}.jpg`;
+  // //   document.body.appendChild(link);
+  // //   link.click();
+  // //   document.body.removeChild(link);
+  // // };
+
+  // // const handleDownload = () => {
+  // //   const a = document.createElement("a");
+  // //   a.href = match.url;
+  // //   a.target = "_blank";
+  // //   a.rel = "noopener noreferrer";
+  // //   a.download = `${match.photoId}.jpg`;
+
+  // //   document.body.appendChild(a);
+  // //   a.click();
+  // //   document.body.removeChild(a);
+  // // };
+
+  // // const handleDownload = async (url, filename = "photo.jpg") => {
+  // //   const response = await fetch(url);
+  // //   const blob = await response.blob();
+  // //   const blobUrl = URL.createObjectURL(blob);
+  // //   const a = document.createElement("a");
+  // //   a.href = blobUrl;
+  // //   a.download = filename;
+  // //   a.click();
+  // //   URL.revokeObjectURL(blobUrl);
+  // // };
+
+  // // const handleDownload = async (url: string, filename = "photo.jpg") => {
+  // //   try {
+  // //     const response = await fetch(url);
+
+  // //     if (!response.ok) {
+  // //       throw new Error("Failed to download image.");
+  // //     }
+
+  // //     const blob = await response.blob();
+  // //     const blobUrl = URL.createObjectURL(blob);
+
+  // //     const a = document.createElement("a");
+  // //     a.href = blobUrl;
+  // //     a.download = filename;
+
+  // //     document.body.appendChild(a);
+  // //     a.click();
+  // //     document.body.removeChild(a);
+
+  // //     URL.revokeObjectURL(blobUrl);
+  // //   } catch (error) {
+  // //     console.error("Download failed:", error);
+  // //   }
+  // // };
+
   // const handleDownload = async () => {
+  //   console.log("=== DOWNLOAD HANDLER HIT ===");
+  //   console.log("URL:", match.url);
+
   //   try {
   //     const response = await fetch(match.url);
 
-  //     if (!response.ok) {
-  //       throw new Error("Failed to download image.");
-  //     }
+  //     console.log("DOWNLOAD STATUS:", response.status);
+  //     console.log("CONTENT TYPE:", response.headers.get("content-type"));
+  //     console.log("CONTENT LENGTH:", response.headers.get("content-length"));
 
   //     const blob = await response.blob();
+
+  //     console.log("BLOB TYPE:", blob.type);
+  //     console.log("BLOB SIZE:", blob.size);
+
   //     const blobUrl = URL.createObjectURL(blob);
 
   //     const anchor = document.createElement("a");
@@ -29,102 +129,13 @@ export function SearchResultCard({ match, className }: SearchResultCardProps) {
 
   //     document.body.appendChild(anchor);
   //     anchor.click();
-  //     anchor.remove();
+  //     document.body.removeChild(anchor);
 
   //     URL.revokeObjectURL(blobUrl);
   //   } catch (error) {
-  //     console.error("Download failed:", error);
+  //     console.error("DOWNLOAD ERROR:", error);
   //   }
   // };
-
-  // const handleDownload = () => {
-  //   const link = document.createElement("a");
-  //   link.href = match.url;
-  //   link.download = `${match.photoId}.jpg`;
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
-
-  // const handleDownload = () => {
-  //   const a = document.createElement("a");
-  //   a.href = match.url;
-  //   a.target = "_blank";
-  //   a.rel = "noopener noreferrer";
-  //   a.download = `${match.photoId}.jpg`;
-
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   document.body.removeChild(a);
-  // };
-
-  // const handleDownload = async (url, filename = "photo.jpg") => {
-  //   const response = await fetch(url);
-  //   const blob = await response.blob();
-  //   const blobUrl = URL.createObjectURL(blob);
-  //   const a = document.createElement("a");
-  //   a.href = blobUrl;
-  //   a.download = filename;
-  //   a.click();
-  //   URL.revokeObjectURL(blobUrl);
-  // };
-
-  // const handleDownload = async (url: string, filename = "photo.jpg") => {
-  //   try {
-  //     const response = await fetch(url);
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to download image.");
-  //     }
-
-  //     const blob = await response.blob();
-  //     const blobUrl = URL.createObjectURL(blob);
-
-  //     const a = document.createElement("a");
-  //     a.href = blobUrl;
-  //     a.download = filename;
-
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     document.body.removeChild(a);
-
-  //     URL.revokeObjectURL(blobUrl);
-  //   } catch (error) {
-  //     console.error("Download failed:", error);
-  //   }
-  // };
-
-  const handleDownload = async () => {
-    console.log("=== DOWNLOAD HANDLER HIT ===");
-    console.log("URL:", match.url);
-
-    try {
-      const response = await fetch(match.url);
-
-      console.log("DOWNLOAD STATUS:", response.status);
-      console.log("CONTENT TYPE:", response.headers.get("content-type"));
-      console.log("CONTENT LENGTH:", response.headers.get("content-length"));
-
-      const blob = await response.blob();
-
-      console.log("BLOB TYPE:", blob.type);
-      console.log("BLOB SIZE:", blob.size);
-
-      const blobUrl = URL.createObjectURL(blob);
-
-      const anchor = document.createElement("a");
-      anchor.href = blobUrl;
-      anchor.download = `${match.photoId}.jpg`;
-
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("DOWNLOAD ERROR:", error);
-    }
-  };
 
   return (
     <div
@@ -156,7 +167,8 @@ export function SearchResultCard({ match, className }: SearchResultCardProps) {
         <Button
           size="sm"
           className="h-8 text-xs gradient-primary border-0"
-          onClick={handleDownload}
+          // onClick={handleDownload}
+          onClick={onDownload}
         >
           <Download className="mr-1 h-3 w-3" />
           Download
