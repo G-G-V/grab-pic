@@ -16,6 +16,8 @@ import { motion } from "framer-motion";
 
 import { signup } from "@/api/auth";
 
+import { toast } from "@/components/ui/use-toast";
+
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,15 @@ export default function Signup() {
       navigate(role === "organizer" ? "/organizer" : "/attendee");
     } catch (error) {
       console.error(error);
-      // We'll add proper error display next.
+
+      toast({
+        title: "Signup failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to create your account.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 
 import { login } from "@/api/auth";
 
+import { toast } from "@/components/ui/use-toast";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +33,12 @@ export default function Login() {
       navigate(result.role === "organizer" ? "/organizer" : "/attendee");
     } catch (error) {
       console.error(error);
-      // We'll improve this into a proper UI toast next.
+      toast({
+        title: "Login failed",
+        description:
+          error instanceof Error ? error.message : "Invalid email or password.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
