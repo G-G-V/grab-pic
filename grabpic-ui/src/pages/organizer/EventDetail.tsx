@@ -297,35 +297,54 @@ export default function EventDetail() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {photos.map((photo) => (
-                <div
-                  key={photo.photoId}
-                  className="glass rounded-xl overflow-hidden"
-                >
-                  {photo.processingStatus === "processed" ? (
-                    <img
-                      src={photo.url}
-                      alt="Event photo"
-                      className="aspect-square w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="aspect-square flex items-center justify-center bg-muted/20">
-                      <div className="text-center px-3">
-                        <p className="text-sm font-medium">
-                          {photo.processingStatus === "failed"
-                            ? "Processing failed"
-                            : "Processing..."}
-                        </p>
+              {photos.map((photo) => {
+                const statusLabel =
+                  photo.processingStatus === "processed"
+                    ? "Processed"
+                    : photo.processingStatus === "failed"
+                      ? "Failed"
+                      : "Processing";
 
-                        <p className="text-xs text-muted-foreground mt-1">
-                          This photo will appear when processing is complete.
-                        </p>
-                      </div>
+                return (
+                  <div
+                    key={photo.photoId}
+                    className="glass rounded-xl overflow-hidden"
+                  >
+                    <div className="relative aspect-square">
+                      {photo.processingStatus === "processed" ? (
+                        <img
+                          src={photo.url}
+                          alt="Event photo"
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center bg-muted/20">
+                          <div className="text-center px-3">
+                            <p className="text-sm font-medium">
+                              {photo.processingStatus === "failed"
+                                ? "Processing failed"
+                                : "Processing..."}
+                            </p>
+
+                            <p className="text-xs text-muted-foreground mt-1">
+                              This photo will appear when processing is
+                              complete.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <Badge
+                        variant="secondary"
+                        className="absolute top-2 right-2 text-xs backdrop-blur-sm"
+                      >
+                        {statusLabel}
+                      </Badge>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           )}
         </TabsContent>

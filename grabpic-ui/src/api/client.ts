@@ -20,9 +20,15 @@ export async function apiRequest<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  // const response = await fetch(`${API_BASE_URL}${path}`, {
+  //   ...options,
+  //   headers,
+  // });
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers,
+    cache: "no-store",
   });
 
   const data = await response.json().catch(() => null);
