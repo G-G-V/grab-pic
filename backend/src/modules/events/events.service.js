@@ -39,6 +39,7 @@ export const getMyEventsService = async ({ organizerId }) => {
     select: {
       id: true,
       name: true,
+      join_code: true,
       created_at: true,
       _count: {
         select: { photos: true },
@@ -50,6 +51,7 @@ export const getMyEventsService = async ({ organizerId }) => {
     events: events.map((e) => ({
       id: e.id,
       name: e.name,
+      joinCode: e.join_code,
       photoCount: e._count.photos,
       createdAt: e.created_at,
     })),

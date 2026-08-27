@@ -158,3 +158,44 @@ export const downloadEventPhotosService = async ({
 
   await archive.finalize();
 };
+
+export const getEventPhotosService = async ({ eventId, organizerId }) => {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { organizer_id: true },
+  });
+
+  if (!event) {
+    const err = new Error('Event not found.');
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (event.organizer_id !== organizerId) {
+    const err = new Error('Access denied. You do not own this event.');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  const photos = await prisma.photo.findMany({
+    where: { event_id: eventId },
+    orderBy: { uploaded_at: 'desc' },
+    select: {
+      id: true,
+      storage_key: true,
+      processing_status: true,
+      uploaded_at: true,
+    },
+  });
+
+  const photosWithUrls = await Promise.all(
+    photos.map(async (p) => ({
+      photoId: p.id,
+      url: await generatePresignedGetUrl(p.storage_key),
+      processingStatus: p.processing_status,
+      uploadedAt: p.uploaded_at,
+    }))
+  );
+
+  return { photos: photosWithUrls };
+};

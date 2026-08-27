@@ -2,6 +2,7 @@ import {
   presignPhotosService,
   confirmUploadService,
   downloadEventPhotosService,
+  getEventPhotosService,
 } from './photos.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 
@@ -46,4 +47,13 @@ export const downloadEventPhotos = async (req, res) => {
     photoIds: photoIds ? photoIds.split(',') : null,
     res, // pass res directly for streaming
   });
+};
+
+export const getEventPhotos = async (req, res) => {
+  const { eventId } = req.params;
+  const { userId } = req.user;
+
+  const result = await getEventPhotosService({ eventId, organizerId: userId });
+
+  return sendSuccess(res, result, 200);
 };
