@@ -24,10 +24,22 @@ export function EventCard({ event, onOpen, onDelete }: EventCardProps) {
 
       <div className="p-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
+          {/* <div className="min-w-0">
+            <h3 className="text-lg font-semibold font-display truncate">
+              {event.name}
+            </h3>
+          </div> */}
           <div className="min-w-0">
             <h3 className="text-lg font-semibold font-display truncate">
               {event.name}
             </h3>
+
+            <p className="text-xs text-muted-foreground mt-1">
+              Join code:{" "}
+              <span className="font-mono font-semibold text-foreground">
+                {event.joinCode}
+              </span>
+            </p>
           </div>
 
           <Badge

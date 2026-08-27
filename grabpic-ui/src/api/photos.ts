@@ -63,3 +63,27 @@ export async function confirmUpload(
     throw new Error("Photo confirmation failed.");
   }
 }
+
+//
+export interface EventPhoto {
+  photoId: string;
+  url: string;
+  processingStatus: string;
+  uploadedAt: string;
+}
+
+interface EventPhotosResponse {
+  success: boolean;
+  photos: EventPhoto[];
+}
+
+export async function getEventPhotos(eventId: string): Promise<EventPhoto[]> {
+  const response = await apiRequest<EventPhotosResponse>(
+    `/events/${eventId}/photos`,
+    {
+      method: "GET",
+    },
+  );
+
+  return response.photos;
+}

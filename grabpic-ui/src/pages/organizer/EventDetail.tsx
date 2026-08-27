@@ -8,7 +8,13 @@ import { toast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { getEvents, type Event } from "@/api/events";
-import { getPresignedUrls, uploadToS3, confirmUpload } from "@/api/photos";
+import {
+  getPresignedUrls,
+  uploadToS3,
+  confirmUpload,
+  getEventPhotos,
+  type EventPhoto,
+} from "@/api/photos";
 import { getEventStats, type EventStats } from "@/api/stats";
 
 export default function EventDetail() {
@@ -20,15 +26,24 @@ export default function EventDetail() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const [photos, setPhotos] = useState<EventPhoto[]>([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+
   const loadData = async () => {
     if (!eventId) return;
 
     try {
       setLoading(true);
 
-      const [events, eventStats] = await Promise.all([
+      // const [events, eventStats] = await Promise.all([
+      //   getEvents(),
+      //   getEventStats(eventId),
+      // ]);
+
+      const [events, eventStats, eventPhotos] = await Promise.all([
         getEvents(),
         getEventStats(eventId),
+        getEventPhotos(eventId),
       ]);
 
       const foundEvent = events.find((item) => item.id === eventId);
@@ -39,6 +54,7 @@ export default function EventDetail() {
 
       setEvent(foundEvent);
       setStats(eventStats);
+      setPhotos(eventPhotos);
     } catch (error) {
       console.error(error);
 
@@ -51,6 +67,53 @@ export default function EventDetail() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadPhotos = async () => {
+    if (!eventId) return;
+
+    try {
+      setLoadingPhotos(true);
+      const eventPhotos = await getEventPhotos(eventId);
+      setPhotos(eventPhotos);
+    } catch (error) {
+      console.error(error);
+
+      toast({
+        title: "Failed to load gallery",
+        description:
+          error instanceof Error ? error.message : "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPhotos(false);
+    }
+  };
+
+  const pollPhotosUntilProcessed = async () => {
+    if (!eventId) return;
+
+    const maxAttempts = 20;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const eventPhotos = await getEventPhotos(eventId);
+      setPhotos(eventPhotos);
+
+      const hasPendingPhotos = eventPhotos.some(
+        (photo) =>
+          photo.processingStatus === "pending" ||
+          photo.processingStatus === "processing",
+      );
+
+      if (!hasPendingPhotos) {
+        break;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+
+    const updatedStats = await getEventStats(eventId);
+    setStats(updatedStats);
   };
 
   useEffect(() => {
@@ -98,8 +161,11 @@ export default function EventDetail() {
       });
 
       // Refresh stats so the photo count updates.
-      const updatedStats = await getEventStats(eventId);
-      setStats(updatedStats);
+      // const updatedStats = await getEventStats(eventId);
+      // setStats(updatedStats);
+      // await loadPhotos();
+      //
+      await pollPhotosUntilProcessed();
     } catch (error) {
       console.error(error);
 
@@ -215,18 +281,53 @@ export default function EventDetail() {
         </TabsContent>
 
         <TabsContent value="gallery" className="mt-6">
-          <div className="glass rounded-2xl p-12 text-center">
-            <Images className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+          {loadingPhotos ? (
+            <div className="glass rounded-2xl p-12 text-center">
+              <p className="text-muted-foreground">Loading gallery...</p>
+            </div>
+          ) : photos.length === 0 ? (
+            <div className="glass rounded-2xl p-12 text-center">
+              <Images className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
 
-            <p className="font-medium">
-              Organizer gallery is not available through the current API.
-            </p>
+              <p className="font-medium">No photos uploaded yet.</p>
 
-            <p className="text-sm text-muted-foreground mt-2">
-              Photos are stored and processed in the background. Attendees
-              retrieve matching photos through the search flow.
-            </p>
-          </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Upload event photos to see them here.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {photos.map((photo) => (
+                <div
+                  key={photo.photoId}
+                  className="glass rounded-xl overflow-hidden"
+                >
+                  {photo.processingStatus === "processed" ? (
+                    <img
+                      src={photo.url}
+                      alt="Event photo"
+                      className="aspect-square w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="aspect-square flex items-center justify-center bg-muted/20">
+                      <div className="text-center px-3">
+                        <p className="text-sm font-medium">
+                          {photo.processingStatus === "failed"
+                            ? "Processing failed"
+                            : "Processing..."}
+                        </p>
+
+                        <p className="text-xs text-muted-foreground mt-1">
+                          This photo will appear when processing is complete.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
