@@ -1,9 +1,20 @@
 import { Queue } from 'bullmq';
 import { env } from '../../config/env.js';
 
+// const connection = {
+//   host: new URL(env.REDIS_URL).hostname,
+//   port: parseInt(new URL(env.REDIS_URL).port) || 6379,
+// };
+
+const redisUrl = new URL(env.REDIS_URL);
+
 const connection = {
-  host: new URL(env.REDIS_URL).hostname,
-  port: parseInt(new URL(env.REDIS_URL).port) || 6379,
+  host: redisUrl.hostname,
+  port: Number(redisUrl.port) || 6379,
+  username: redisUrl.username || undefined,
+  password: redisUrl.password || undefined,
+  ...(redisUrl.protocol === 'rediss:' ? { tls: {} } : {}),
+  maxRetriesPerRequest: null,
 };
 
 /**

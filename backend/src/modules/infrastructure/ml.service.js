@@ -14,7 +14,8 @@ export const processImage = async ({ imageUrl, imageBase64 }) => {
 
   const response = await axios.post(`${env.ML_SERVICE_URL}/process`, payload, {
     headers: { 'Content-Type': 'application/json' },
-    timeout: 30000, // 30s — DeepFace can be slow on first inference (model load)
+    // timeout: 30000, // 30s — DeepFace can be slow on first inference (model load)
+    timeout: 120000, // 2 minutes — tolerate ML Space cold start
   });
 
   return response.data.faces; // array of { embedding: [...512 floats], bbox: {...} }
