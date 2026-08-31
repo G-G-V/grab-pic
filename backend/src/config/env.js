@@ -33,4 +33,7 @@ export const env = {
 
   // Redis
   REDIS_URL: requireEnv('REDIS_URL'),
+
+  // CORS
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:8080',
 };

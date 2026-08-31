@@ -1,4 +1,5 @@
 import express from 'express';
+import { env } from './config/env.js';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -16,7 +17,12 @@ import analyticsRoutes from './modules/analytics/analytics.routes.js';
 const app = express();
 
 // Middleware
-app.use(cors());
+// app.use(cors());
+app.use(
+  cors({
+    origin: env.CORS_ORIGIN,
+  })
+);
 app.use(express.json({ limit: '10mb' })); // 10mb for base64 image uploads in search
 
 app.use(express.urlencoded({ extended: true }));
