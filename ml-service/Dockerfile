@@ -20,6 +20,11 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy application code
 COPY app ./app
 
+# Pre-download/warm the exact model used by the application.
+# This makes the DeepFace model available inside the built image
+# instead of downloading it on the first production request.
+RUN python -c "from deepface import DeepFace; DeepFace.build_model('Facenet512')"
+
 # Expose FastAPI port
 EXPOSE 8000
 
